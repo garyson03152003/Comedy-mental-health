@@ -67,3 +67,25 @@ axes[0].set_ylabel("Suicides vs expected (%)")
 fig.text(0.01, 0.01, "Deviation of log daily suicides from year and calendar-month averages, US 1999–2025 "
          "(CDC WONDER). Shaded: hiatus.", fontsize=8, color=INK2)
 fig.tight_layout(rect=(0, 0.05, 1, 1)); fig.savefig("results/fig3_suicides.png", dpi=160)
+
+# 4. Stacked DiD: per-event estimates (suicides, mentally unhealthy days)
+NAMES = {"wga2007": "2007–08 writers' strike", "leno_to_conan_2009": "Leno → Conan (2009)",
+         "conan_tonight_end_2010": "Conan leaves Tonight (2010)", "leno_final_2014": "Leno's last Tonight (2014)",
+         "colbert_report_end_2014": "Colbert Report ends (2014)", "letterman_final_2015": "Letterman retires (2015)",
+         "stewart_final_2015": "Jon Stewart leaves (2015)", "wga2023": "2023 writers' strike", "kimmel_2025": "Kimmel suspended (2025)"}
+order = list(NAMES)
+fig, axes = plt.subplots(1, 2, figsize=(9.5, 4.2), sharey=True)
+for ax, (f, scale, title, unit) in zip(axes, [("stacked_suicides", 100, "Suicides", "% per +1 viewing rate"),
+                                               ("stacked_brfss", 1, "Mentally unhealthy days", "days per +1 viewing rate")]):
+    r = pd.read_csv(f"results/{f}.csv")
+    r = r[r.n_events == 1]
+    if "outcome" in r: r = r[r.outcome.isin(["suicides (log)", "menthlth"])]
+    r = r.set_index("events").reindex(order).dropna(subset=["est"])
+    ypos = [order.index(e) for e in r.index]
+    ax.axvline(0, color=GRID, lw=1)
+    ax.errorbar(r.est * scale, ypos, xerr=1.96 * r.se * scale, fmt="o", color=BLUE, ms=6, lw=2, capsize=0)
+    ax.set_title(title, loc="left", color=INK, fontsize=10); ax.set_xlabel(unit)
+axes[0].set_yticks(range(len(order)), [NAMES[e] for e in order]); axes[0].invert_yaxis()
+fig.text(0.01, 0.01, "Each dot: age groups that watched the show more vs less, while it was gone. Bars: 95% CI.",
+         fontsize=8, color=INK2)
+fig.tight_layout(rect=(0, 0.04, 1, 1)); fig.savefig("results/fig4_stacked_events.png", dpi=160)

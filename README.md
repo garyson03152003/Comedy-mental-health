@@ -5,7 +5,7 @@ Natural experiments: the **2007–08** and **2023** Writers Guild strikes, which
 shows (and, in 2007–08, scripted comedies) off the air for months for reasons unrelated to viewers.
 
 ## Data
-- **BRFSS 2006–09, 2022–25** (CDC; ~3.4M interviews): mentally unhealthy days in the past 30 days,
+- **BRFSS 2006–16, 2022–25** (CDC; ~3.4M interviews): mentally unhealthy days in the past 30 days,
   frequent mental distress (≥14 days), and, from 2023, a direct loneliness item (`SDLONELY`).
 - **CDC WONDER** monthly suicide deaths by age group, 1999–2025 (national).
 - **Google Trends** pre-strike search interest in each late-night host, by state and nationally.
@@ -146,10 +146,47 @@ No sign that young men did worse when South Park was off the air. That includes 
 suicides tracked other groups almost exactly (+0.1% ± 1.8%). Every per-episode estimate has the wrong sign for a "missing the show"
 effect and inside the placebo range.
 
+## Stacked DiD: shows that paused, ended or were replaced, by age-group viewing (`results/stacked_*.csv`, `fig4_stacked_events.png`)
+Nine late-night events (`data/show_events.csv`):
+- **Paused:** the 2007–08 strike, the 2023 strike, Kimmel's 2025 suspension.
+- **Ended:** Conan leaving The Tonight Show in 2010, the Colbert Report ending in 2014, Letterman retiring in 2015.
+- **Replaced:** Leno → Conan in 2009, Leno's final Tonight Show in 2014, Jon Stewart leaving in 2015.
+
+Each show's audience age profile is calibrated to its reported Nielsen median viewer age:
+ATUS TV time by single year of age is tilted until its median matches (`src/show_profiles.py`, `results/show_age_profiles.csv`).
+Sources for the medians are listed in the events file. Leno and Letterman ≈55–60 put their audiences 2–3× the population rate among people 75+;
+Conan, Colbert Report and Stewart (33–41) over-index on people under 35.
+
+Model, stacked across events: y = β · (share of period the show was gone) × (age group's viewing rate − 1)
++ event×age-group FE + event×period FE. β compares age groups that watched more vs less *in the same event and
+period*. Suicides use national month × ten-year age, ±12 months. BRFSS uses interview day × five-year age, ±6 months, with state FE;
+2010–16 BRFSS files were added for this. Placebos move every event by ±1–3 years.
+
+| Outcome | Events | Per +1 viewing rate | SE | p | Placebo SD |
+|---|---|---|---|---|---|
+| Suicides | all 8 with data | +1.2% | 0.9 | 0.19 | 1.5% |
+| Suicides | paused (2) | +2.2% | 1.9 | 0.27 | 5.8% |
+| Suicides | ended/replaced (6) | +1.0% | 1.0 | 0.31 | 1.5% |
+| Mentally unhealthy days | all 9 | −0.03 | 0.04 | 0.46 | 0.05 |
+| Mentally unhealthy days | paused (3) | +0.03 | 0.13 | 0.80 | 1.1 |
+| Mentally unhealthy days | ended/replaced (6) | −0.04 | 0.05 | 0.42 | 0.05 |
+| Frequent distress | all 9 | −0.1 pp | 0.1 | 0.68 | 0.2 pp |
+
+- Nothing exceeds its placebo spread, and the survey estimates are essentially zero.
+- One pattern is worth a follow-up: 7 of the 8 per-event suicide estimates are positive, i.e. the shows' heavier-viewing age groups
+  were slightly up while the show was gone. The pooled +1.2% is still within the placebo SD, and differing age trends in suicide
+  within the 24-month windows could produce it. Adding age-specific trends, or state-level data, would test it.
+- The 2007–08 strike is the only single event with a significant survey estimate (+0.47 days, p≈0.03). It is not robust:
+  Conan's exit gives −0.37 in the other direction, and with 9 events one nominal hit is expected by chance.
+
+Caveats: the median ages come from scattered trade-press reports (2009–2015), and several are proxies
+(Conan's TBS-era median, 2015 medians used for 2023 and 2025). No public age data exist for sitcom finales such as
+The Office or Big Bang Theory, so they are not included. The tilted-ATUS profile is a model of each audience, not measured viewing.
+
 ## Reproduce
 ```
 pip install pandas pyreadstat pyarrow pyfixest matplotlib requests pytrends pyreadr
-./src/download_brfss.sh            # ~650 MB zipped, ~7 GB unzipped, into data/raw/
+./src/download_brfss.sh            # ~1.3 GB zipped, ~14 GB unzipped, into data/raw/
 python3 src/extract_brfss.py
 python3 src/pageviews.py
 python3 src/wonder.py D76 data/wonder/d76_month_age.csv V5     # 1999-2020 (used through 2017)
@@ -165,5 +202,8 @@ python3 src/wonder.py D76 data/wonder/d76_month_sex_age.csv V7 V5
 python3 src/wonder.py D176 data/wonder/d176_month_sex_age.csv V7 V5
 python3 src/southpark_episodes.py
 PYTHONPATH=src python3 src/analysis_southpark.py
+python3 src/show_profiles.py
+PYTHONPATH=src python3 src/analysis_stacked.py            # suicides
+PYTHONPATH=src python3 src/analysis_stacked.py --brfss    # BRFSS
 python3 src/plots.py
 ```
