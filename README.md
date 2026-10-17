@@ -143,7 +143,7 @@ If going off air hurt fans, the estimates per new episode would be *negative*.
 | Lonely, men 18–34 (2023–25) | vs others, same day | +0.84 pp | 1.5 pp | 0.06 (clustered SE) |
 
 No sign that young men did worse when South Park was off the air. That includes the two-year gap, during which young men's
-suicides tracked other groups almost exactly (+0.1% ± 1.8%). Every estimate is the wrong sign for a "missing the show"
+suicides tracked other groups almost exactly (+0.1% ± 1.8%). Every per-episode estimate has the wrong sign for a "missing the show"
 effect and inside the placebo range.
 
 ## Reproduce
