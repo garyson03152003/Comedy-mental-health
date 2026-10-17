@@ -8,6 +8,7 @@ shows (and, in 2007–08, scripted comedies) off the air for months for reasons 
 - **BRFSS 2006–09, 2022–25** (CDC; ~3.4M interviews): mentally unhealthy days in the past 30 days,
   frequent mental distress (≥14 days), and, from 2023, a direct loneliness item (`SDLONELY`).
 - **CDC WONDER** monthly suicide deaths by age group, 1999–2025 (national).
+- **Google Trends** pre-strike search interest in each late-night host, by state and nationally.
 - **Wikipedia pageviews** for five nightly late-night shows, a stand-in for audience attention.
 
 ## Design
@@ -52,7 +53,7 @@ Testing them directly needs viewing data (e.g. ATUS, or a panel survey with TV i
 National monthly suicide deaths by age group, 1999–2025, from CDC WONDER: final data through 2017,
 then the provisional database. The API only gives national totals. Model: log suicides per day =
 hiatus share of the month + year + calendar-month fixed effects. For inference, a hiatus of the same length is placed at
-every possible start month in non-event years (~280 placebos), and the real estimate is ranked against them.
+every possible start month in non-event years (~250 placebos), and the real estimate is ranked against them.
 
 | Event | Group | Change in suicides | Typical placebo swing (SD) | Placebo p |
 |---|---|---|---|---|
@@ -66,9 +67,35 @@ None of the estimates stands out from ordinary month-to-month noise. Normal fluc
 smaller than about 5% (roughly 200 deaths a month nationally) could not be detected. Kimmel's 6-day
 suspension is far too short for monthly data (placebo SD 19%). 2025 counts are provisional.
 
+## Weighted by pre-strike show popularity (`results/popularity_weighted_*.csv`)
+Exposure becomes a dose. For each show that went dark, take its Google Trends search interest in the
+respondent's state over the 12 months before the strike (`data/trends/`). Weight it by the show's national
+pre-strike interest, multiply by the share of the 30-day recall window the show was dark (using each show's
+own dates, e.g. Kimmel came back Oct 24, 2023), and sum over shows. 1 = an average-popularity state with every
+show dark all month. State popularity ranges 0.59–1.72 in 2023 and 0.76–1.28 in 2007.
+
+| | Mentally unhealthy days | Frequent distress | Lonely |
+|---|---|---|---|
+| 2023, weighted dose | +0.11 (p=0.30) | +0.5 pp (p=0.29) | **+1.4 pp (p=0.03)** |
+| 2023, extra effect per +1 state popularity | +0.29 (p=0.16) | +1.1 pp (p=0.28) | +0.9 pp (p=0.60) |
+| 2007–08, weighted dose | −0.07 (p=0.44) | −0.4 pp (p=0.33) | n/a |
+| 2007–08, extra effect per +1 state popularity | −0.49 (p=0.34) | −1.4 pp (p=0.49) | n/a |
+
+- **Loneliness is the one suggestive result.** The weighted effect is +1.4 pp. It holds against each
+  comparison year separately (+1.3 pp, p≈0.07) and against 2025 using May–December only (+1.3 pp).
+  Fake strikes in 2024 and 2025 produce only ±0.3 pp.
+- **But there is no dose-response.** States that searched for these shows more did not become lonelier during the strike.
+  If losing the shows caused loneliness, they should have. So the loneliness bump looks like a nationwide feature of
+  mid-2023 rather than an effect of the shows. Fake-strike checks on the cross-state comparison give values from −0.45 to +0.01 days (mentally unhealthy days) and −0.01 to +0.01 (loneliness), so the real estimates sit inside the noise.
+- **Suicides, both strikes pooled** (each weighted by the national pre-strike popularity of the shows that went dark):
+  +1.4% at peak dose for all ages (placebo SD 2.8%, p=0.60), +3.6% for 55+ (p=0.32), and +0.2% for under 55 (p=0.91).
+- **Limits of the popularity measure.** Google Trends measures *search* interest, not viewing. It over-represents
+  younger, online audiences (e.g. the Daily Show outranks Leno in 2007 despite a much smaller TV audience),
+  and comparisons across eras reflect how internet use changed. Local Nielsen ratings by market would be better if you can get them.
+
 ## Reproduce
 ```
-pip install pandas pyreadstat pyarrow pyfixest matplotlib requests
+pip install pandas pyreadstat pyarrow pyfixest matplotlib requests pytrends
 ./src/download_brfss.sh            # ~650 MB zipped, ~7 GB unzipped, into data/raw/
 python3 src/extract_brfss.py
 python3 src/pageviews.py
@@ -76,5 +103,7 @@ python3 src/wonder.py D76 data/wonder/d76_month_age.csv V5     # 1999-2020 (used
 python3 src/wonder.py D176 data/wonder/d176_month_age.csv V5    # 2018-present provisional
 PYTHONPATH=src python3 src/analysis_strikes.py
 PYTHONPATH=src python3 src/analysis_suicide.py
+python3 src/trends.py                                           # Google Trends, cached in data/trends/
+PYTHONPATH=src python3 src/analysis_popularity.py
 python3 src/plots.py
 ```
