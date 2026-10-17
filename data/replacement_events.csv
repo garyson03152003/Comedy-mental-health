@@ -1,0 +1,11 @@
+event,type,show,start,end,median_age,median_source
+olympics2002,sports,Tonight Show (Leno),2002-02-08,2002-02-25,55,"Talk Show News 2009 (proxy)"
+olympics2004,sports,Tonight Show (Leno),2004-08-13,2004-08-30,55,"Talk Show News 2009 (proxy)"
+olympics2006,sports,Tonight Show (Leno),2006-02-10,2006-02-27,55,"Talk Show News 2009 (proxy)"
+olympics2008,sports,Tonight Show (Leno),2008-08-08,2008-08-25,55,"Talk Show News 2009"
+olympics2012,sports,Tonight Show (Leno),2012-07-27,2012-08-13,55,"Talk Show News 2009 (proxy)"
+olympics2016,sports,Tonight Show (Fallon),2016-08-05,2016-08-22,54.3,"USA Today 2015"
+olympics2018,sports,Tonight Show (Fallon),2018-02-09,2018-02-26,54.3,"USA Today 2015 (5-minute 'Fallon 5' aired instead)"
+olympics2021,sports,Tonight Show (Fallon),2021-07-23,2021-08-09,54.3,"USA Today 2015 (proxy; COVID year)"
+olympics2022,sports,Tonight Show (Fallon),2022-02-04,2022-02-21,54.3,"USA Today 2015 (proxy)"
+olympics2024,sports,Tonight Show (Fallon),2024-07-29,2024-08-12,54.3,"USA Today 2015 (proxy); NBC: preempted Jul 29, back Aug 12"

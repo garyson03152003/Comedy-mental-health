@@ -5,7 +5,7 @@ Natural experiments: the **2007–08** and **2023** Writers Guild strikes, which
 shows (and, in 2007–08, scripted comedies) off the air for months for reasons unrelated to viewers.
 
 ## Data
-- **BRFSS 2006–16, 2022–25** (CDC; ~6.9M interviews): mentally unhealthy days in the past 30 days,
+- **BRFSS 2006–25** (CDC; ~9M interviews): mentally unhealthy days in the past 30 days,
   frequent mental distress (≥14 days), and, from 2023, a direct loneliness item (`SDLONELY`).
 - **CDC WONDER** monthly suicide deaths by age group, 1999–2025 (national).
 - **Google Trends** pre-strike search interest in each late-night host, by state and nationally.
@@ -160,17 +160,17 @@ Conan, Colbert Report and Stewart (33–41) over-index on people under 35.
 Model, stacked across events: y = β · (share of period the show was gone) × (age group's viewing rate − 1)
 + event×age-group FE + event×period FE. β compares age groups that watched more vs less *in the same event and
 period*. Suicides use national month × ten-year age, ±12 months. BRFSS uses interview day × five-year age, ±6 months, with state FE;
-2010–16 BRFSS files were added for this. Placebos move every event by ±1–3 years.
+2010–21 BRFSS files were added for this. Placebos move every event by ±1–3 years.
 
 | Outcome | Events | Per +1 viewing rate | SE | p | Placebo SD |
 |---|---|---|---|---|---|
 | Suicides | all 8 with data | +1.2% | 0.9 | 0.19 | 1.5% |
 | Suicides | paused (2) | +2.2% | 1.9 | 0.27 | 5.8% |
 | Suicides | ended/replaced (6) | +1.0% | 1.0 | 0.31 | 1.5% |
-| Mentally unhealthy days | all 9 | −0.03 | 0.04 | 0.46 | 0.05 |
-| Mentally unhealthy days | paused (3) | +0.03 | 0.13 | 0.80 | 1.1 |
-| Mentally unhealthy days | ended/replaced (6) | −0.04 | 0.05 | 0.42 | 0.05 |
-| Frequent distress | all 9 | −0.1 pp | 0.1 | 0.68 | 0.2 pp |
+| Mentally unhealthy days | all 9 | −0.03 | 0.04 | 0.46 | 0.06 |
+| Mentally unhealthy days | paused (3) | +0.03 | 0.13 | 0.80 | 0.24 |
+| Mentally unhealthy days | ended/replaced (6) | −0.04 | 0.05 | 0.42 | 0.07 |
+| Frequent distress | all 9 | −0.1 pp | 0.1 | 0.68 | 0.3 pp |
 
 - Nothing exceeds its placebo spread, and the survey estimates are essentially zero.
 - One pattern is worth a follow-up: 7 of the 8 per-event suicide estimates are positive, i.e. the shows' heavier-viewing age groups
@@ -183,10 +183,35 @@ Caveats: the median ages come from scattered trade-press reports (2009–2015), 
 (Conan's TBS-era median, 2015 medians used for 2023 and 2025). No public age data exist for sitcom finales such as
 The Office or Big Bang Theory, so they are not included. The tilted-ATUS profile is a model of each audience, not measured viewing.
 
+## Comedy replaced by other programming (`results/replaced_*.csv`)
+**NBC Olympics.** The Tonight Show is preempted by Games coverage for ~2.5 weeks every two years
+(`data/replacement_events.csv`; NBC confirmed Paris 2024 as Jul 29–Aug 12; in 2018 a 5-minute "Fallon 5" aired instead).
+2010 and 2014 are dropped because they overlap the Conan exit and Leno's finale. The stacked DiD is the same as above, using a
+Tonight Show age profile (Leno 55, Fallon 54.3).
+
+| Outcome | Events | Per +1 viewing rate | SE | p | Placebo SD | Placebo p |
+|---|---|---|---|---|---|---|
+| Suicides | 10 Games, 2002–24 | −0.2% | 3.1 | 0.94 | 2.5% | 1.00 |
+| Suicides | excluding Tokyo 2021 | −1.0% | 3.2 | 0.75 | 2.7% | 0.83 |
+| Mentally unhealthy days | 7 Games with BRFSS, 2008–24 | +0.08 | 0.14 | 0.58 | 0.18 | 0.83 |
+| Mentally unhealthy days | excluding Tokyo 2021 | +0.27 | 0.12 | 0.04 | 0.19 | 0.17 |
+| Frequent distress | 7 Games | +0.2 pp | 0.6 | 0.75 | 0.8 pp | 0.67 |
+
+The survey estimate is fragile. With the four Games first available it was +0.30 (p=0.04). Adding 2018, 2021 and 2022
+(BRFSS 2017–21 were downloaded for this) brings it to +0.08. Dropping COVID-era Tokyo brings it back to +0.27, but that is
+within 1.4 placebo SDs (placebo p=0.17). Per-Games estimates range from −1.2 (2021) to +1.3 (2024). The Olympics also skew
+old, so this is the net effect of swapping comedy for sports, not of losing TV.
+
+**CBS 12:37am.** After Midnight's last episode aired June 12, 2025; reports conflict on whether *Comics Unleashed* filled the slot.
+There is no audience age data, so this uses the population-level strike design (2025 vs the same weeks of 2023–24).
+The estimates are −0.20 days (p<0.001) and −0.9 pp frequent distress, i.e. *better* after the show ended, while fake endings
+in 2023/2024 give +0.13 and +0.07. With an audience of well under 1% of adults, a population shift this size cannot come from the show.
+It reflects something else in mid/late 2025 (e.g. the 2025 BRFSS fieldwork) and shows the limit of designs without an exposed group.
+
 ## Reproduce
 ```
 pip install pandas pyreadstat pyarrow pyfixest matplotlib requests pytrends pyreadr
-./src/download_brfss.sh            # ~1.3 GB zipped, ~14 GB unzipped, into data/raw/
+./src/download_brfss.sh            # ~1.8 GB zipped, ~19 GB unzipped, into data/raw/
 python3 src/extract_brfss.py
 python3 src/pageviews.py
 python3 src/wonder.py D76 data/wonder/d76_month_age.csv V5     # 1999-2020 (used through 2017)
@@ -205,5 +230,8 @@ PYTHONPATH=src python3 src/analysis_southpark.py
 python3 src/show_profiles.py
 PYTHONPATH=src python3 src/analysis_stacked.py            # suicides
 PYTHONPATH=src python3 src/analysis_stacked.py --brfss    # BRFSS
+python3 src/show_profiles.py data/replacement_events.csv results/replacement_age_profiles.csv
+PYTHONPATH=src python3 src/analysis_replaced.py           # suicides
+PYTHONPATH=src python3 src/analysis_replaced.py --brfss   # BRFSS
 python3 src/plots.py
 ```

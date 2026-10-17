@@ -5,6 +5,7 @@ with theta solved so the audience's median age equals the show's reported median
 Intensity for an age group = the show's viewers in the group / the group's population share,
 scaled so the population average is 1 ("relative viewing rate"). Multi-show events average their shows.
 """
+import sys
 import numpy as np, pandas as pd, pyreadr
 from scipy.optimize import brentq
 
@@ -23,7 +24,8 @@ GROUPS = {
 }
 
 def profile(year, median):
-    x = d[d.tuyear.between(min(year, 2016) - 3, min(year, 2016))]
+    hi = min(max(year, 2006), 2016)  # ATUS covers 2003-2016: use the 4 diary years closest to the event
+    x = d[d.tuyear.between(hi - 3, hi)]
     pop = x.groupby("age").wt.sum()
     base = (x.wt * x.tv).groupby(x.age).sum()
     ages = base.index.values.astype(float)
@@ -35,7 +37,8 @@ def profile(year, median):
     viewers = pd.Series(base.values * np.exp(theta * (ages - 50)), index=base.index)
     return viewers / viewers.sum(), pop / pop.sum()
 
-ev = pd.read_csv("data/show_events.csv", parse_dates=["start", "end"])
+EVENTS_CSV, OUT_CSV = (sys.argv[1:3] if len(sys.argv) > 2 else ("data/show_events.csv", "results/show_age_profiles.csv"))
+ev = pd.read_csv(EVENTS_CSV, parse_dates=["start", "end"])
 rows = []
 for r in ev.itertuples():
     v, p = profile(r.start.year, r.median_age)
@@ -45,6 +48,6 @@ for r in ev.itertuples():
         for k, val in rate.items():
             rows.append(dict(event=r.event, show=r.show, scheme=scheme, group=str(k), rate=val))
 prof = pd.DataFrame(rows).groupby(["event", "scheme", "group"], as_index=False).rate.mean()
-prof.to_csv("results/show_age_profiles.csv", index=False)
+prof.to_csv(OUT_CSV, index=False)
 if __name__ == "__main__":
     print(prof[prof.scheme == "wonder"].pivot(index="group", columns="event", values="rate").round(2).to_string())

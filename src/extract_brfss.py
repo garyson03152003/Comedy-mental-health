@@ -4,7 +4,7 @@ import numpy as np, pandas as pd, pyreadstat
 
 COLS = ["IDATE", "_STATE", "MENTHLTH", "POORHLTH", "GENHLTH", "_AGEG5YR", "MARITAL",
         "NUMADULT", "HHADULT", "_LLCPWT", "_FINALWT", "SDLONELY", "LSATISFY", "EMTSUPRT",
-        "SEX", "SEXVAR", "_EDUCAG"]
+        "SEX", "SEX1", "SEXVAR", "_EDUCAG"]
 
 def days(x):
     """BRFSS 'days in past 30' coding: 1-30 days, 88 = none, 77/99 = don't know/refused."""
@@ -24,7 +24,7 @@ for f in sorted(glob.glob("data/raw/*.XPT")):
         "genhlth_poor": df["GENHLTH"].map({1: 0, 2: 0, 3: 0, 4: 1, 5: 1}),
         "agegrp": df["_AGEG5YR"].where(df["_AGEG5YR"] < 14),  # 1=18-24 ... 13=80+
         "married": df["MARITAL"].map({1: 1, 2: 0, 3: 0, 4: 0, 5: 0, 6: 1}),
-        "sex_female": (df["SEXVAR"] if "SEXVAR" in df else df["SEX"]).map({1: 0, 2: 1}),
+        "sex_female": df[next(c for c in ("SEXVAR", "SEX1", "SEX") if c in df)].map({1: 0, 2: 1}),
         "educ": df["_EDUCAG"].where(df["_EDUCAG"] < 9),
         "weight": df["_LLCPWT"] if "_LLCPWT" in df else df["_FINALWT"],
     })
