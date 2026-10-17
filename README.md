@@ -28,10 +28,10 @@ living alone (heavy, companionship-style viewers) were hit harder. Placebos assi
 
 | Event | Outcome | Effect | 95% CI | Baseline |
 |---|---|---|---|---|
-| 2023 strike | Mentally unhealthy days | +0.08 days | −0.10 to +0.27 | 4.9 |
-| 2023 strike | Frequent mental distress | +0.4 pp | −0.4 to +1.1 | 15.7% |
+| 2023 strike | Mentally unhealthy days | +0.07 days | −0.11 to +0.25 | 4.9 |
+| 2023 strike | Frequent mental distress | +0.3 pp | −0.5 to +1.1 | 15.7% |
 | 2023 strike | Lonely (at least sometimes) | +1.1 pp | −0.1 to +2.4 | 32% |
-| 2023 strike | Extra effect, 50+ living alone (days) | −0.15 days | −0.57 to +0.27 | |
+| 2023 strike | Extra effect, 50+ living alone (days) | −0.14 days | −0.55 to +0.27 | |
 | 2007–08 strike | Mentally unhealthy days | −0.12 days | −0.26 to +0.02 | 3.4 |
 | 2007–08 strike | Extra effect, 50+ living alone (days) | +0.16 days | −0.06 to +0.39 | |
 
@@ -78,7 +78,7 @@ show dark all month. State popularity ranges 0.59–1.72 in 2023 and 0.76–1.28
 
 | | Mentally unhealthy days | Frequent distress | Lonely |
 |---|---|---|---|
-| 2023, weighted dose | +0.11 (p=0.30) | +0.5 pp (p=0.29) | **+1.4 pp (p=0.03)** |
+| 2023, weighted dose | +0.10 (p=0.35) | +0.4 pp (p=0.33) | **+1.4 pp (p=0.03)** |
 | 2023, extra effect per +1 state popularity | +0.29 (p=0.16) | +1.1 pp (p=0.28) | +0.9 pp (p=0.60) |
 | 2007–08, weighted dose | −0.07 (p=0.44) | −0.4 pp (p=0.33) | n/a |
 | 2007–08, extra effect per +1 state popularity | −0.49 (p=0.34) | −1.4 pp (p=0.49) | n/a |
@@ -104,7 +104,7 @@ state show-popularity dose from the section above.
 
 | | Poor mental-health days | Frequent distress | Lonely |
 |---|---|---|---|
-| 2023, age × popularity weighted | +0.08 (p=0.46) | +0.4 pp (p=0.35) | +1.0 pp (p=0.13) |
+| 2023, age × popularity weighted | +0.07 (p=0.52) | +0.3 pp (p=0.39) | +1.0 pp (p=0.13) |
 | 2023, extra per +1 age propensity | +0.03 (p=0.89) | +0.3 pp (p=0.67) | +0.9 pp (p=0.62) |
 | 2007–08, age × popularity weighted | −0.03 (p=0.74) | −0.2 pp (p=0.53) | n/a |
 | 2007–08, extra per +1 age propensity | +0.49 (p=0.13) | +2.0 pp (p=0.13) | n/a |

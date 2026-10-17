@@ -1,7 +1,7 @@
 analysis,est_pct_per_episode,placebo_sd,placebo_p,n_placebos
 "suicides, men 15-34 (year + calendar-month FE)",0.1134185508498897,0.18360534897337602,0.625,24
-"suicides, men 15-34 vs all other sex-age groups, same month",0.054580099917297974,0.23140805456372454,0.9166666666666666,24
-"suicides, men 15-34 vs others during Apr 2023-Jun 2025 gap (2015+)",0.09218481238977781,,0.9598932979896317,0
-"BRFSS menthlth, men 18-34 vs others, per new episode in past 30 days",0.007919197845007964,0.020249393444341294,0.6666666666666666,6
-"BRFSS fmd, men 18-34 vs others, per new episode in past 30 days",0.0005086638586121394,0.0007598953435824503,0.6666666666666666,6
-"BRFSS lonely, men 18-34 vs others, per new episode in past 30 days",0.008371924393175951,0.015404780035708188,0.5,6
+"suicides, men 15-34 vs all other sex-age groups, same month",0.05458009991729794,0.23140805456372454,0.9166666666666666,24
+"suicides, men 15-34 vs others during Apr 2023-Jun 2025 gap (2015+)",0.09218481238977744,,0.9598932979896317,0
+"BRFSS menthlth, men 18-34 vs others, per new episode in past 30 days",0.007731149859764905,0.019801199902307495,0.6666666666666666,6
+"BRFSS fmd, men 18-34 vs others, per new episode in past 30 days",0.00047246138465912104,0.0007386010718810558,0.5,6
+"BRFSS lonely, men 18-34 vs others, per new episode in past 30 days",0.008371924393251073,0.01540478003592264,0.5,6
