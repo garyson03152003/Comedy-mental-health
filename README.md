@@ -234,6 +234,40 @@ During the 2023 strike, states 1 SD more into late night changed by less than ±
 changed calls in South Park-heavy states by less than ±0.6%. Caveats: until Sep 2024 calls were routed by area code rather than
 location, so "state" is the phone's state. And Trends popularity measures search interest, not viewing.
 
+## How big could the effect on actual viewers be? (`results/per_viewer_bounds.csv`)
+Population estimates average over everyone, but only viewers lose the show. If a share s of adults watch, a population
+effect b means b/s per viewer. Audience: in Q1 2023 Colbert (~2.8M), Kimmel (~1.75M) and Fallon (~1.6M) drew ~6.2M on an average night
+(my estimate, worked back from LateNighter's Q1 2024 report), ≈2.4% of adults. Regular viewers are more, so s = 5% and 10% are also shown.
+Uncertainty uses the larger of the model SE and the placebo SD.
+
+| Estimate | Outcome | Population 95% CI | Per viewer, s=2.4% | s=5% | s=10% |
+|---|---|---|---|---|---|
+| 9 late-night events, stacked by age | mentally unhealthy days (base ≈4/30) | −0.15 to +0.09 d | −6.1 to +3.7 d | −2.9 to +1.8 d | −1.5 to +0.9 d |
+| 9 late-night events, stacked by age | frequent distress (base ≈12%) | −0.6 to +0.5 pp | −25 to +20 pp | −12 to +10 pp | −6 to +5 pp |
+| 2023 strike, all adults | mentally unhealthy days (base 4.9) | −0.4 to +0.6 d | −18 to +24 d | −9 to +11 d | −4 to +6 d |
+| 2023 strike, all adults | lonely (base 32%) | −0.1 to +2.4 pp | −6 to +99 pp | −3 to +48 pp | −1 to +24 pp |
+| 8 late-night events, stacked by age | suicides | −2% to +4% | −52% to +441% | −29% to +125% | −16% to +50% |
+| 2023 strike, 988 by state popularity | 988 calls | −16% to +11% | uninformative | −97% to +660% | −83% to +176% |
+
+**The nulls do not rule out meaningful effects on fans.** The tightest bound is from pooling the nine stacked events, and it only excludes
+effects larger than about +2–4 poor mental-health days a month for nightly viewers. That is roughly a doubling of their baseline.
+Only if regular viewers are as many as 10% of adults does it shrink to about +1 day. Strike-only, loneliness, suicide and 988 bounds
+are far wider. Detecting fan-level effects of the size fan surveys suggest needs data that identifies viewers.
+
+## Did viewers switch to other comedy? (`results/substitution_trends.csv`)
+Google Trends weekly US interest, 2022–2025, with each set in one query so terms share a scale (`src/substitution_trends.py`).
+- **2023 strike**, strike weeks vs the same weeks of 2022 and 2024, net of each year's level (fake strikes in 2022 and 2024 move terms ±7–13%):
+  Jimmy Fallon −27% (p=0.01; the first stage); Gutfeld! +15% (p=0.27); stand-up comedy +16% (p=0.08); The Office +4% (p=0.05).
+  Gutfeld! kept airing through the strike. The shifts toward it and toward stand-up are about 1–2× the placebo range, so they are suggestive, not conclusive.
+  Samba TV also reported late-night viewers moving to streaming during the strike.
+- **South Park**: each new South Park release raises South Park interest by 68% (first stage). Family Guy is 7% *lower* in those weeks
+  (p=0.04), a small hint of switching. The Simpsons rises with it (+11%), and Rick and Morty and Bob's Burgers show no clear link.
+  Over the 2023–25 gap every rival fell *more* than South Park did (−22% to −45% vs −9%), so there was no lasting move to them.
+
+**Reading:** viewing does move a little toward other comedy (non-striking late night, stand-up, sitcom reruns) when shows go dark.
+That would dampen any effect of losing a show, but it is too small to be the whole story behind the nulls. The per-viewer bounds above
+are the bigger reason: the data cannot see fan-sized effects.
+
 ## Reproduce
 ```
 pip install pandas pyreadstat pyarrow pyfixest matplotlib requests pytrends pyreadr
@@ -260,5 +294,7 @@ python3 src/show_profiles.py data/replacement_events.csv results/replacement_age
 PYTHONPATH=src python3 src/analysis_replaced.py           # suicides
 PYTHONPATH=src python3 src/analysis_replaced.py --brfss   # BRFSS
 PYTHONPATH=src python3 src/analysis_988.py
+python3 src/per_viewer_bounds.py
+python3 src/substitution_trends.py && PYTHONPATH=src python3 src/analysis_substitution.py
 python3 src/plots.py
 ```
