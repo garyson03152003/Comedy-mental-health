@@ -47,3 +47,23 @@ axes[0].text(7.75, axes[0].get_ylim()[1] * 0.92, "strike*", ha="center", color=I
 fig.text(0.01, 0.01, "*Shaded: months whose 30-day recall overlaps the strike. Bars: 95% CI, state-clustered. "
          "Reference month: April 2023.", fontsize=8, color=INK2)
 fig.tight_layout(rect=(0, 0.05, 1, 1)); fig.savefig("results/fig2_event_study_2023.png", dpi=160)
+
+# 3. Suicides: monthly deviation from year + calendar-month pattern, around each strike
+import numpy as np, pyfixest as pf, matplotlib.dates
+sm = pd.read_csv("results/suicides_monthly.csv", parse_dates=["month"])
+sm["resid"] = pf.feols("y ~ 1 | year + moy", data=sm).resid()
+fig, axes = plt.subplots(1, 2, figsize=(9, 3.4), sharey=True)
+for ax, (lo, hi, s, e, title) in zip(axes, [
+        ("2006-01-01", "2009-12-31", "2007-11-05", "2008-03-31", "2007–08 strike"),
+        ("2022-01-01", "2024-12-31", "2023-05-02", "2023-10-02", "2023 strike")]):
+    x = sm[(sm.month >= lo) & (sm.month <= hi)]
+    ax.axvspan(pd.Timestamp(s), pd.Timestamp(e), color=SHADE, zorder=0)
+    ax.axhline(0, color=GRID, lw=1)
+    ax.plot(x.month, 100 * x.resid, color=BLUE, lw=2, marker="o", ms=4)
+    ax.set_title(title, loc="left", color=INK, fontsize=10)
+    ax.xaxis.set_major_locator(matplotlib.dates.YearLocator())
+    ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%Y"))
+axes[0].set_ylabel("Suicides vs expected (%)")
+fig.text(0.01, 0.01, "Deviation of log daily suicides from year and calendar-month averages, US 1999–2025 "
+         "(CDC WONDER). Shaded: hiatus.", fontsize=8, color=INK2)
+fig.tight_layout(rect=(0, 0.05, 1, 1)); fig.savefig("results/fig3_suicides.png", dpi=160)

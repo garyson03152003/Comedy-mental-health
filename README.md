@@ -7,6 +7,7 @@ shows (and, in 2007–08, scripted comedies) off the air for months for reasons 
 ## Data
 - **BRFSS 2006–09, 2022–25** (CDC; ~3.4M interviews): mentally unhealthy days in the past 30 days,
   frequent mental distress (≥14 days), and, from 2023, a direct loneliness item (`SDLONELY`).
+- **CDC WONDER** monthly suicide deaths by age group, 1999–2025 (national).
 - **Wikipedia pageviews** for five nightly late-night shows, a stand-in for audience attention.
 
 ## Design
@@ -47,12 +48,33 @@ per month, or under 2 points of loneliness. This contrasts with the fan surveys 
 which find distress among strongly attached viewers. Those viewers are probably too few to move population averages.
 Testing them directly needs viewing data (e.g. ATUS, or a panel survey with TV items).
 
+## Suicide deaths (`results/suicide_estimates.csv`, `fig3_suicides.png`)
+National monthly suicide deaths by age group, 1999–2025, from CDC WONDER: final data through 2017,
+then the provisional database. The API only gives national totals. Model: log suicides per day =
+hiatus share of the month + year + calendar-month fixed effects. For inference, a hiatus of the same length is placed at
+every possible start month in non-event years (~280 placebos), and the real estimate is ranked against them.
+
+| Event | Group | Change in suicides | Typical placebo swing (SD) | Placebo p |
+|---|---|---|---|---|
+| 2023 strike | All ages | +0.1% | 2.4% | 0.95 |
+| 2023 strike | 55+ | +1.5% | 2.8% | 0.54 |
+| 2023 strike | 55+ relative to under-55 | +2.3% | 2.5% | 0.27 |
+| 2007–08 strike (scripted + late night) | All ages | +1.5% | 2.5% | 0.46 |
+| 2007–08 strike (late night only) | 55+ | +4.1% | 3.6% | 0.25 |
+
+None of the estimates stands out from ordinary month-to-month noise. Normal fluctuation is about ±2.5%, so an effect
+smaller than about 5% (roughly 200 deaths a month nationally) could not be detected. Kimmel's 6-day
+suspension is far too short for monthly data (placebo SD 19%). 2025 counts are provisional.
+
 ## Reproduce
 ```
 pip install pandas pyreadstat pyarrow pyfixest matplotlib requests
 ./src/download_brfss.sh            # ~650 MB zipped, ~7 GB unzipped, into data/raw/
 python3 src/extract_brfss.py
 python3 src/pageviews.py
+python3 src/wonder.py D76 data/wonder/d76_month_age.csv V5     # 1999-2020 (used through 2017)
+python3 src/wonder.py D176 data/wonder/d176_month_age.csv V5    # 2018-present provisional
 PYTHONPATH=src python3 src/analysis_strikes.py
+PYTHONPATH=src python3 src/analysis_suicide.py
 python3 src/plots.py
 ```
