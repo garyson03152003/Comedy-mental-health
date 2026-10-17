@@ -11,6 +11,7 @@ shows (and, in 2007–08, scripted comedies) off the air for months for reasons 
 - **Google Trends** pre-strike search interest in each late-night host, by state and nationally.
 - **American Time Use Survey** (2003–16, via the CRAN `atus` package): daily TV minutes by age.
 - **TVmaze** air dates for every South Park episode and special.
+- **988 Lifeline** routed calls/texts/chats by state and month, Aug 2022–Sep 2025 (GAO-26-108114).
 - **Wikipedia pageviews** for five nightly late-night shows, a stand-in for audience attention.
 
 ## Design
@@ -208,6 +209,31 @@ The estimates are −0.20 days (p<0.001) and −0.9 pp frequent distress, i.e. *
 in 2023/2024 give +0.13 and +0.07. With an audience of well under 1% of adults, a population shift this size cannot come from the show.
 It reflects something else in mid/late 2025 (e.g. the 2025 BRFSS fieldwork) and shows the limit of designs without an exposed group.
 
+## 988 Suicide & Crisis Lifeline contacts by state (`results/988_estimates.csv`)
+Data: routed calls, texts and chats by state and month, Aug 2022–Sep 2025, from GAO's state-by-state 988 file
+(GAO-26-108114; `data/988/`). The design is a cross-state dose-response: did states that liked a show more see bigger changes in
+988 contacts while it was gone? Model: log contacts = β · (share of month show gone) × (state's pre-event Google Trends popularity − mean)
++ state FE + month FE + state × post-Sep-2024 FE. Month FE absorb 988's launch ramp, seasonality and national news.
+The state × post-Sep-2024 FE absorbs the switch from area-code routing to georouting. Placebos put windows of the same length at every other
+start month, or shift the South Park calendar by ±1–12 months.
+
+The table shows the effect for a state 1 SD more into the show (SD 0.16–0.28) at the event's peak monthly exposure:
+
+| Event | Outcome | Effect | 95% CI ± | Placebo p |
+|---|---|---|---|---|
+| 2023 writers' strike (Fallon/Colbert/Kimmel, full months dark) | calls | −0.8% | 2.8 | 0.61 |
+| 2023 writers' strike | all contacts | +0.2% | 3.4 | 0.86 |
+| 2024 Olympics (Tonight Show preempted ~2 weeks) | calls | +2.8% | 5.3 | 0.12 |
+| 2024 Olympics | all contacts | +1.8% | 5.8 | 0.52 |
+| Kimmel suspension, Sep 2025 (6 days) | calls | −0.1% | 3.0 | 0.89 |
+| South Park, per new release | calls | +0.1% | 0.5 | 0.75 |
+| South Park, per new release | all contacts | −0.0% | 0.8 | 0.96 |
+
+Adding state-specific linear trends changes none of the conclusions (all placebo p ≥ 0.24). Nothing moves 988 contacts.
+During the 2023 strike, states 1 SD more into late night changed by less than ±3%. Each extra South Park release
+changed calls in South Park-heavy states by less than ±0.6%. Caveats: until Sep 2024 calls were routed by area code rather than
+location, so "state" is the phone's state. And Trends popularity measures search interest, not viewing.
+
 ## Reproduce
 ```
 pip install pandas pyreadstat pyarrow pyfixest matplotlib requests pytrends pyreadr
@@ -233,5 +259,6 @@ PYTHONPATH=src python3 src/analysis_stacked.py --brfss    # BRFSS
 python3 src/show_profiles.py data/replacement_events.csv results/replacement_age_profiles.csv
 PYTHONPATH=src python3 src/analysis_replaced.py           # suicides
 PYTHONPATH=src python3 src/analysis_replaced.py --brfss   # BRFSS
+PYTHONPATH=src python3 src/analysis_988.py
 python3 src/plots.py
 ```

@@ -53,3 +53,15 @@ if not os.path.exists(lr_path):
     k = a["Jimmy Kimmel"].sum() / b["Jimmy Kimmel"].sum()
     pd.concat([a, (b * k).drop(columns="Jimmy Kimmel")], axis=1).to_csv(lr_path)
 print(pd.read_csv(lr_path, index_col=0, parse_dates=True).resample("YE").mean().round(1).iloc[[3, 4, 18, 19]])
+
+# Single-show state popularity for the 988 analyses (12 months before each event).
+SINGLE = {"southpark_gap2023": ("South Park", "2022-04-01 2023-03-31"),
+          "olympics2024_fallon": ("Jimmy Fallon", "2023-07-01 2024-06-30"),
+          "kimmel2025": ("Jimmy Kimmel", "2024-09-01 2025-08-31")}
+for key, (term, tf) in SINGLE.items():
+    path = f"{OUT}/{key}_states.csv"
+    if not os.path.exists(path):
+        call(t.build_payload, [term], timeframe=tf, geo="US")
+        call(t.interest_by_region, resolution="REGION", inc_low_vol=True)[[term]].to_csv(path)
+        time.sleep(5)
+    print(key, pd.read_csv(path, index_col=0).describe().T.round(1).to_string())
