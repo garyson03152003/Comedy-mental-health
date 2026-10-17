@@ -5,7 +5,7 @@ Natural experiments: the **2007–08** and **2023** Writers Guild strikes, which
 shows (and, in 2007–08, scripted comedies) off the air for months for reasons unrelated to viewers.
 
 ## Data
-- **BRFSS 2006–16, 2022–25** (CDC; ~3.4M interviews): mentally unhealthy days in the past 30 days,
+- **BRFSS 2006–16, 2022–25** (CDC; ~6.9M interviews): mentally unhealthy days in the past 30 days,
   frequent mental distress (≥14 days), and, from 2023, a direct loneliness item (`SDLONELY`).
 - **CDC WONDER** monthly suicide deaths by age group, 1999–2025 (national).
 - **Google Trends** pre-strike search interest in each late-night host, by state and nationally.
