@@ -1,0 +1,3 @@
+model,pct_change_per_unit,placebo_sd_pct,placebo_p,n_placebos
+A: age x year + age x month-of-year FE,2.1864900408937293,2.817831700952517,0.358974358974359,78
+"B: + month FE (within-month, across ages)",5.461656735369935,7.568087780407125,0.47435897435897434,78
