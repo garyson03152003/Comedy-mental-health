@@ -65,29 +65,6 @@ def rec(label, y, tidy, term):
     rows.append(dict(analysis=label, outcome=y, term=term, est=t.Estimate, se=t["Std. Error"], p=t["Pr(>|t|)"]))
     print(f"{label:38s} {y:9s} {term:8s} {t.Estimate:+.3f} (se {t['Std. Error']:.3f}, p={t['Pr(>|t|)']:.2f})")
 
-cases = [("2023 strike", "wga2023", "wga2023_latenight", 1, [2022, 2023, 2024], 2023, ["menthlth", "fmd"]),
-         ("2023 strike (vs 2024-25)", "wga2023", "wga2023_latenight", 1, [2023, 2024, 2025], 2023, ["lonely"]),
-         ("2007-08 strike (late night)", "wga2007", "wga2007_latenight", 7, [2006, 2007, 2008], 2007, ["menthlth", "fmd"])]
-for label, strike, ev, m0, seasons, treated, ys in cases:
-    s = add_dose(A.setup(A.d, ev, m0, seasons, treated), strike)
-    if m0 == 7:
-        s = s[s.week <= 47]
-    print(f"  {label}: state popularity index P ranges {s.P.min():.2f}-{s.P.max():.2f}")
-    for y in ys:
-        rec(label + ": weighted", y, fit(s, y, "dose"), "dose")
-        rec(label + ": dose-response", y, fit(s, y, "exp + exp_x_P"), "exp_x_P")
-
-# placebo dose-response: fake strikes in non-strike years, same state popularity
-for label, seasons, treated, shift, y in [("PLACEBO 2022 (vs 2024)", [2022, 2024], 2022, -1, "menthlth"),
-                                          ("PLACEBO 2024 (vs 2022)", [2022, 2024], 2024, 1, "menthlth"),
-                                          ("PLACEBO 2024 (vs 2025)", [2024, 2025], 2024, 1, "lonely"),
-                                          ("PLACEBO 2025 (vs 2024)", [2024, 2025], 2025, 2, "lonely")]:
-    s = add_dose(A.setup(A.d, "wga2023_latenight", 1, seasons, treated, shift_years=shift), "wga2023", shift)
-    rec(label + ": weighted", y, fit(s, y, "dose"), "dose")
-    rec(label + ": dose-response", y, fit(s, y, "exp + exp_x_P"), "exp_x_P")
-
-pd.DataFrame(rows).to_csv("results/popularity_weighted_estimates.csv", index=False)
-
 # ---- suicides: pool both strikes, dose = national pre-strike popularity of the dark shows ----
 lr = pd.read_csv("data/trends/national_monthly_2004_2025.csv", index_col=0, parse_dates=True)
 def nat_dose(months, shift_months=0):
@@ -99,21 +76,45 @@ def nat_dose(months, shift_months=0):
             a, b = (pd.Timestamp(x) + pd.DateOffset(months=shift_months) for x in (a, b))
             dose += pre[show].mean() * share(months, a, b)
     return dose
-srows = []
-for grp_name, grp in [("all ages", None), ("55+", True), ("under 55", False)]:
-    p = panel(grp)
-    scale = nat_dose(p.month).max()  # 1 = the most popular strike-month dose
-    b = pf.feols("y ~ dose | year + moy", data=p.assign(dose=nat_dose(p.month) / scale)).coef()["dose"]
-    pl = []
-    for k in range(-200, 220):
-        if k == 0: continue
-        months_hit = {(pd.Timestamp(x) + pd.DateOffset(months=k)).year for sh in DARK.values() for w in sh.values() for x in w}
-        if months_hit & (EVENT_YEARS | {2020}) or min(months_hit) < 1999 or max(months_hit) > 2025:
-            continue
-        pl.append(pf.feols("y ~ dose | year + moy", data=p.assign(dose=nat_dose(p.month, k) / scale)).coef()["dose"])
-    pl = np.array(pl)
-    srows.append(dict(group=grp_name, pct_change_at_peak_dose=100 * (np.exp(b) - 1), placebo_sd_pct=100 * pl.std(),
-                      placebo_p=(np.abs(pl) >= abs(b)).mean(), n_placebos=len(pl)))
-    print(f"suicides, popularity-weighted pooled  {grp_name:9s} {100*(np.exp(b)-1):+.2f}% at peak dose  "
-          f"placebo SD {100*pl.std():.2f}%  p={(np.abs(pl) >= abs(b)).mean():.2f}  ({len(pl)} placebos)")
-pd.DataFrame(srows).to_csv("results/popularity_weighted_suicides.csv", index=False)
+if __name__ == "__main__":
+    cases = [("2023 strike", "wga2023", "wga2023_latenight", 1, [2022, 2023, 2024], 2023, ["menthlth", "fmd"]),
+             ("2023 strike (vs 2024-25)", "wga2023", "wga2023_latenight", 1, [2023, 2024, 2025], 2023, ["lonely"]),
+             ("2007-08 strike (late night)", "wga2007", "wga2007_latenight", 7, [2006, 2007, 2008], 2007, ["menthlth", "fmd"])]
+    for label, strike, ev, m0, seasons, treated, ys in cases:
+        s = add_dose(A.setup(A.d, ev, m0, seasons, treated), strike)
+        if m0 == 7:
+            s = s[s.week <= 47]
+        print(f"  {label}: state popularity index P ranges {s.P.min():.2f}-{s.P.max():.2f}")
+        for y in ys:
+            rec(label + ": weighted", y, fit(s, y, "dose"), "dose")
+            rec(label + ": dose-response", y, fit(s, y, "exp + exp_x_P"), "exp_x_P")
+
+    # placebo dose-response: fake strikes in non-strike years, same state popularity
+    for label, seasons, treated, shift, y in [("PLACEBO 2022 (vs 2024)", [2022, 2024], 2022, -1, "menthlth"),
+                                              ("PLACEBO 2024 (vs 2022)", [2022, 2024], 2024, 1, "menthlth"),
+                                              ("PLACEBO 2024 (vs 2025)", [2024, 2025], 2024, 1, "lonely"),
+                                              ("PLACEBO 2025 (vs 2024)", [2024, 2025], 2025, 2, "lonely")]:
+        s = add_dose(A.setup(A.d, "wga2023_latenight", 1, seasons, treated, shift_years=shift), "wga2023", shift)
+        rec(label + ": weighted", y, fit(s, y, "dose"), "dose")
+        rec(label + ": dose-response", y, fit(s, y, "exp + exp_x_P"), "exp_x_P")
+
+    pd.DataFrame(rows).to_csv("results/popularity_weighted_estimates.csv", index=False)
+
+    srows = []
+    for grp_name, grp in [("all ages", None), ("55+", True), ("under 55", False)]:
+        p = panel(grp)
+        scale = nat_dose(p.month).max()  # 1 = the most popular strike-month dose
+        b = pf.feols("y ~ dose | year + moy", data=p.assign(dose=nat_dose(p.month) / scale)).coef()["dose"]
+        pl = []
+        for k in range(-200, 220):
+            if k == 0: continue
+            months_hit = {(pd.Timestamp(x) + pd.DateOffset(months=k)).year for sh in DARK.values() for w in sh.values() for x in w}
+            if months_hit & (EVENT_YEARS | {2020}) or min(months_hit) < 1999 or max(months_hit) > 2025:
+                continue
+            pl.append(pf.feols("y ~ dose | year + moy", data=p.assign(dose=nat_dose(p.month, k) / scale)).coef()["dose"])
+        pl = np.array(pl)
+        srows.append(dict(group=grp_name, pct_change_at_peak_dose=100 * (np.exp(b) - 1), placebo_sd_pct=100 * pl.std(),
+                          placebo_p=(np.abs(pl) >= abs(b)).mean(), n_placebos=len(pl)))
+        print(f"suicides, popularity-weighted pooled  {grp_name:9s} {100*(np.exp(b)-1):+.2f}% at peak dose  "
+              f"placebo SD {100*pl.std():.2f}%  p={(np.abs(pl) >= abs(b)).mean():.2f}  ({len(pl)} placebos)")
+    pd.DataFrame(srows).to_csv("results/popularity_weighted_suicides.csv", index=False)

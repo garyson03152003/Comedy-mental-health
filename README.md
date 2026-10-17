@@ -9,6 +9,7 @@ shows (and, in 2007–08, scripted comedies) off the air for months for reasons 
   frequent mental distress (≥14 days), and, from 2023, a direct loneliness item (`SDLONELY`).
 - **CDC WONDER** monthly suicide deaths by age group, 1999–2025 (national).
 - **Google Trends** pre-strike search interest in each late-night host, by state and nationally.
+- **American Time Use Survey** (2003–16, via the CRAN `atus` package): daily TV minutes by age.
 - **Wikipedia pageviews** for five nightly late-night shows, a stand-in for audience attention.
 
 ## Design
@@ -93,9 +94,38 @@ show dark all month. State popularity ranges 0.59–1.72 in 2023 and 0.76–1.28
   younger, online audiences (e.g. the Daily Show outranks Leno in 2007 despite a much smaller TV audience),
   and comparisons across eras reflect how internet use changed. Local Nielsen ratings by market would be better if you can get them.
 
+## Also weighted by age group's TV propensity (`results/age_weighted_*.csv`)
+How likely each age group is to watch comes from the American Time Use Survey: weighted mean daily TV minutes by
+age, relative to the population mean (`results/atus_tv_by_age.csv`). The 2003–06 diaries are used for the
+2007 strike and the 2013–16 diaries, the latest in the open copy, for 2023. Viewing rises steeply with age: 15–34-year-olds
+watch about 0.8× the average and 75+ about 1.6× (≈130 vs ≈260 min/day). Each respondent's dose = age propensity ×
+state show-popularity dose from the section above.
+
+| | Poor mental-health days | Frequent distress | Lonely |
+|---|---|---|---|
+| 2023, age × popularity weighted | +0.08 (p=0.46) | +0.4 pp (p=0.35) | +1.0 pp (p=0.13) |
+| 2023, extra per +1 age propensity | +0.03 (p=0.89) | +0.3 pp (p=0.67) | +0.9 pp (p=0.62) |
+| 2007–08, age × popularity weighted | −0.03 (p=0.74) | −0.2 pp (p=0.53) | n/a |
+| 2007–08, extra per +1 age propensity | +0.49 (p=0.13) | +2.0 pp (p=0.13) | n/a |
+
+The "extra" rows use age-specific season and week fixed effects, so they test only whether heavier-viewing ages
+changed more than lighter-viewing ages *at the same time*. Fake strikes give −0.02 to +0.36 days and −2.5 to +0.3 pp of
+loneliness on the same test. The only hint is 2007–08: older, heavier-viewing ages rose relative to younger ones
+(+0.49 days per unit of propensity), but this is not significant and is within the placebo range.
+
+Suicides, as a month × ten-year age group panel (ages 15+) with dose = age propensity × national popularity-weighted
+dark share:
+- with age×year and age×calendar-month FE: +2.2% per unit dose (placebo SD 2.8%, p=0.36);
+- adding month FE, so the estimate comes only from differences between ages within the same month: +5.5% (placebo SD 7.6%, p=0.47).
+
+Limits: the open ATUS copy (CRAN `atus`, 2003–16) has no clock times, so this is *total* TV time by age, not
+late-night viewing, and the 2023 profile is several years old. The full BLS files (2003–2024, with activity start times)
+would allow propensity to watch during the 11:35pm–12:35am slot specifically, from 2019–22 diaries. BLS blocks
+automated downloads that don't identify a contact.
+
 ## Reproduce
 ```
-pip install pandas pyreadstat pyarrow pyfixest matplotlib requests pytrends
+pip install pandas pyreadstat pyarrow pyfixest matplotlib requests pytrends pyreadr
 ./src/download_brfss.sh            # ~650 MB zipped, ~7 GB unzipped, into data/raw/
 python3 src/extract_brfss.py
 python3 src/pageviews.py
@@ -105,5 +135,8 @@ PYTHONPATH=src python3 src/analysis_strikes.py
 PYTHONPATH=src python3 src/analysis_suicide.py
 python3 src/trends.py                                           # Google Trends, cached in data/trends/
 PYTHONPATH=src python3 src/analysis_popularity.py
+# ATUS (abridged, 2003-16): curl -O https://cran.r-project.org/src/contrib/Archive/atus/atus_0.2.tar.gz into data/raw/atus_pkg and untar
+python3 src/atus_age.py
+PYTHONPATH=src python3 src/analysis_age.py
 python3 src/plots.py
 ```
