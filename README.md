@@ -10,6 +10,7 @@ shows (and, in 2007–08, scripted comedies) off the air for months for reasons 
 - **CDC WONDER** monthly suicide deaths by age group, 1999–2025 (national).
 - **Google Trends** pre-strike search interest in each late-night host, by state and nationally.
 - **American Time Use Survey** (2003–16, via the CRAN `atus` package): daily TV minutes by age.
+- **TVmaze** air dates for every South Park episode and special.
 - **Wikipedia pageviews** for five nightly late-night shows, a stand-in for audience attention.
 
 ## Design
@@ -123,6 +124,28 @@ late-night viewing, and the 2023 profile is several years old. The full BLS file
 would allow propensity to watch during the 11:35pm–12:35am slot specifically, from 2019–22 diaries. BLS blocks
 automated downloads that don't identify a contact.
 
+## South Park on and off air (`results/southpark_estimates.csv`)
+South Park's core audience is young men; historically it ranked #1 among men 18–34. Its schedule varies a lot from year to year,
+e.g. there was no regular season from April 2023 to July 2025 (only three Paramount+ specials), and the Season 27 premiere was pushed back two weeks in July 2025.
+Exposure = new South Park releases (TVmaze air dates: 353 episodes and specials, including Paramount+ specials) per month,
+or in the respondent's 30-day recall window. Calendar-month or week-of-year fixed effects remove the show's usual spring/fall
+rhythm. Triple differences compare young men with everyone else in the same month (suicides) or on the same interview day
+(BRFSS). Placebos shift the whole episode calendar by ±1–12 years (suicides) or ±1–3 years (BRFSS).
+If going off air hurt fans, the estimates per new episode would be *negative*.
+
+| Outcome | Comparison | Per new episode | Placebo SD | p |
+|---|---|---|---|---|
+| Suicides, men 15–34 | own history (year + calendar-month FE) | +0.11% | 0.18% | 0.62 (placebo) |
+| Suicides, men 15–34 | vs all other sex-age groups, same month | +0.05% | 0.23% | 0.92 (placebo) |
+| Suicides, men 15–34 | vs others, Apr 2023–Jun 2025 gap as a whole | +0.09% total | | 0.96 |
+| Mentally unhealthy days, men 18–34 | vs others, same day | +0.008 days | 0.020 | 0.77 |
+| Frequent distress, men 18–34 | vs others, same day | +0.05 pp | 0.08 pp | 0.51 |
+| Lonely, men 18–34 (2023–25) | vs others, same day | +0.84 pp | 1.5 pp | 0.06 (clustered SE) |
+
+No sign that young men did worse when South Park was off the air. That includes the two-year gap, during which young men's
+suicides tracked other groups almost exactly (+0.1% ± 1.8%). Every estimate is the wrong sign for a "missing the show"
+effect and inside the placebo range.
+
 ## Reproduce
 ```
 pip install pandas pyreadstat pyarrow pyfixest matplotlib requests pytrends pyreadr
@@ -138,5 +161,9 @@ PYTHONPATH=src python3 src/analysis_popularity.py
 # ATUS (abridged, 2003-16): curl -O https://cran.r-project.org/src/contrib/Archive/atus/atus_0.2.tar.gz into data/raw/atus_pkg and untar
 python3 src/atus_age.py
 PYTHONPATH=src python3 src/analysis_age.py
+python3 src/wonder.py D76 data/wonder/d76_month_sex_age.csv V7 V5
+python3 src/wonder.py D176 data/wonder/d176_month_sex_age.csv V7 V5
+python3 src/southpark_episodes.py
+PYTHONPATH=src python3 src/analysis_southpark.py
 python3 src/plots.py
 ```
